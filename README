@@ -1,0 +1,53 @@
+Lazy text converter for Acrobat XFDF (note dump)
+Copyright (c) 2012 Kenshi Muto <kmuto@debian.org>.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+3. Neither the name of the University nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+Environment:
+- Linux/MacOS X/Unix
+- Ruby 1.8 or above
+
+Usage:
+xfdftotxt.rb FILE > DUMPFILE
+OFF=startnombre xfdftotxt.rb FILE > DUMPFILE
+
+使い方 (in Japanese):
+Acroabt Pro Xから、注釈の一覧を「XFDF」というXMLテキストで保存することができる
+ようになっています。
+このXMLテキストからテキストに関係する部分だけを抽出します。
+また、注釈に入っている「ページ」は文書情報のノンブルにかかわらず常に1始まりの
+ようなのですが、環境変数OFFに開始のノンブルをオフセットとして指定しながら
+実行することで、出力テキストにはこのオフセットを加えたノンブルとしてテキスト
+化されます。
+
+xfdtotxt.rb XFDFファイル名 > テキストファイル名
+OFF=開始ノンブルオフセット xfdtotxt.rb XFDFファイル名 > テキストファイル名
+
+例:
+OFF=273 xfdtotxt.rb sample-comments.xfdf > sample-comments.txt
+
+273ページから始まっているPDFの、注釈XFDF(sample-comments.xfdf)を、
+sample-comments.txtとして保存します。
