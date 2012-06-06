@@ -46,7 +46,7 @@ class XFDFListener
 
   def tag_start(tag, attrs)
     case tag
-    when "text", "freetext"
+    when "text", "freetext", "annots"
       @page = attrs["page"].to_i
       if @beginning.nil?
         puts
@@ -54,7 +54,7 @@ class XFDFListener
         @beginning = nil
       end
       puts "[p.#{@page + @offset}]"
-    when "p"
+    when "p", "contents"
       @para = ""
     end
   end
@@ -65,7 +65,7 @@ class XFDFListener
 
   def tag_end(tag)
     case tag
-    when "p"
+    when "p", "contents"
       puts @para.gsub("\r", "\n")
       @para = nil
     end
