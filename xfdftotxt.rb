@@ -1,6 +1,6 @@
-#!/usr/bin/ruby
-# Lazy text converter for Acrobat XFDF (note dump)
-# Copyright (c) 2012 Kenshi Muto <kmuto@debian.org>.
+#!/usr/bin/env ruby
+# text extractor for Acrobat XFDF (note dump)
+# Copyright (c) 2012-2021 Kenshi Muto <kmuto@debian.org>.
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -38,36 +38,96 @@ include REXML
 class XFDFListener
   include StreamListener
   def initialize(offset)
-    @page = 1
     @offset = offset
     @para = nil
-    @beginning = true
+    @page = nil
+    @name = nil # id
+    @title = nil # commenter
+    @date = nil
+    @location = nil
+    @inreplyto = nil
+    @inpara = nil
+    @items = []
+    @root = { name: '0', title: '', inreplyto: nil }
+    @thispage = nil
   end
 
   def tag_start(tag, attrs)
     case tag
-    when "text", "freetext", "annots"
-      @page = attrs["page"].to_i
-      if @beginning.nil?
-        puts
+    when 'text', 'freetext', 'annots', 'highlight'
+      return if attrs.empty?
+      @page = attrs['page'].to_i + @offset
+      @name = attrs['name']
+      @title = attrs['title']
+      @date = attrs['date'].sub('D:', '').sub(/\+.*/, '').to_i
+      @inreplyto = attrs['inreplyto']
+      if attrs['coords']
+        co = attrs['coords'].split(',').map {|a| a.to_i }
+        @location = sprintf('%04d+%04d', co[0], co[1])
       else
-        @beginning = nil
+        @location = '0000+0000'
       end
-      puts "[p.#{@page + @offset}]"
-    when "p", "contents"
-      @para = ""
+    when 'contents', 'contents-richtext'
+      @para = []
+    when 'p'
+      @inpara = true
     end
   end
 
   def text(s)
-    @para << s unless @para.nil?
+    @para << s.gsub("\r", "\n") if @inpara
   end
 
   def tag_end(tag)
     case tag
-    when "p", "contents"
-      puts @para.gsub("\r", "\n")
+    when 'p'
+      @para << "\n"
+      @inpara = nil
+    when 'contents', 'contents-richtext'
+      @items << { name: @name, title: @title, inreplyto: @inreplyto, date: @date, page: @page, location: @location, contents: @para.join }
       @para = nil
+    when 'xfdf'
+      show_sorted_comments
+    end
+  end
+
+  def show_sorted_comments
+    map = {}
+
+    @items.each do |e|
+      map[e[:name]] = e
+    end
+    @tree = {}
+
+    @items.sort_by {|x| x[:date]}.sort_by {|x| x[:location]}.sort_by {|x| x[:page]}.each do |e|
+      # puts e
+      pid = e[:inreplyto]
+      if pid == nil || !map.has_key?(pid)
+        (@tree[@root] ||= []) << e
+      else
+        (@tree[map[pid]] ||= []) << e
+      end
+    end
+
+    print_tree(@root, 0)
+  end
+
+  def print_tree(item, level)
+    items = @tree[item]
+    unless items == nil
+      items.each do |e|
+        if @thispage != e[:page]
+          @thispage = e[:page]
+          puts "\n■ p.#{@thispage}"
+        end
+        if level < 1
+          puts "\n■■ commented by #{e[:title]}"
+        else
+          puts "■■#{'■' * level} replied by #{e[:title]}"
+        end
+        puts e[:contents]
+        print_tree(e, level + 1)
+      end
     end
   end
 end
