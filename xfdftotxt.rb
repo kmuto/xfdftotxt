@@ -63,7 +63,7 @@ class XFDFListener
       @inreplyto = attrs['inreplyto']
       if attrs['coords']
         co = attrs['coords'].split(',').map {|a| a.to_i }
-        @location = sprintf('%04d+%04d', co[0], co[1])
+        @location = sprintf('%04d+%04d', co[1], co[0])
       else
         @location = '0000+0000'
       end
