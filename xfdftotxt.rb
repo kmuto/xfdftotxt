@@ -61,9 +61,9 @@ class XFDFListener
       @title = attrs['title']
       @date = attrs['date'].sub('D:', '').sub(/\+.*/, '').to_i
       @inreplyto = attrs['inreplyto']
-      if attrs['coords']
-        co = attrs['coords'].split(',').map {|a| a.to_i }
-        @location = sprintf('%04d+%04d', co[1], co[0])
+      if attrs['rect']
+        co = attrs['rect'].split(',').map {|a| a.to_i }
+        @location = sprintf('%04d+%04d', 9999 - co[1], co[0]) # Y (swapped), X
       else
         @location = '0000+0000'
       end
